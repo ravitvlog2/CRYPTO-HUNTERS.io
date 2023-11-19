@@ -42,9 +42,7 @@ const signupUser = (email, password, nickName, phoneNumber, phoneCountryCode, ph
 
 
 
-
-
-const updateprofil = (nickName, about,countryCode,city,phoneNumber, phoneCountryCode, phoneCode,walletfix,fullName,authtoken ) => new Promise((resolve, reject) => {
+const updateprofil = (nickName, about,countryCode,city,phoneNumber, phoneCountryCode, phoneCode,walletfix,fullName,authtoken,age ) => new Promise((resolve, reject) => {
 	data = {
 		"nickName": nickName,
 		"about": about,
@@ -56,7 +54,8 @@ const updateprofil = (nickName, about,countryCode,city,phoneNumber, phoneCountry
 		"externalWalletAddress": walletfix,
 		"twitterLink": "https://twitter.com/"+nickName,
 		"faceBookLink": "https://www.facebook.com/"+nickName,
-		"fullName": fullName
+		"fullName": fullName,
+		"age": "25"
 	}
 	fetch('https://api-prod.crypto-hunters.io/api/user/update', {
 		method: 'PUT',
@@ -115,14 +114,16 @@ function generatePassword() {
 
 (async () => {
 	do{
-		
+		try{
 
 		const wallet = ethers.Wallet.createRandom();
 		walletaddress = wallet.address
 		pk = wallet.privateKey
-		console.log(`WALLET => ${walletaddress} | PK => ${pk}`)
+		// console.log(`WALLET => ${walletaddress} | PK => ${pk}`)
 		const profil = await randomGenerator.genRdm('male', 'US', 20, 30, 'sound')
 		nickName=profil.username
+		randomnomorusername = Math.floor(Math.random() * (99 - 10 + 1)) + 10
+		nickName=nickName+randomnomorusername
 		phoneNumber = profil.phone
 		phoneCountryCode='US'
 		phoneCode=profil.countryCode
@@ -136,6 +137,8 @@ function generatePassword() {
 		listkota =['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
 		city = listkota[Math.floor(Math.random() * listkota.length)];
 		password = generatePassword();
+		age = profil.age
+
 		email =email.toString();
 		password =password.toString();
 		nickName =nickName.toString();
@@ -144,18 +147,19 @@ function generatePassword() {
 		phoneCode =phoneCode.toString();
 		countryCode =countryCode.toString();
 		city = city.toString()
+		age =age.toString();
 
 		save = email+';'+ password+';'+ nickName+';'+''+walletaddress+ ';'+pk
 		regist = await signupUser(email,password,nickName,phoneNumber,phoneCountryCode,phoneCode,countryCode,city)
 		if(regist.success==true){
 			authtoken = regist.result.authToken
-			console.log('Sukses Regist...')
-			age = profil.age
+			// console.log('Sukses Regist...')
+			
 			about = 'Hello My Name is '+namalengkap+' , Im From '+city
 			walletfix = walletaddress
 			fullName= namalengkap
-			console.log('Update Profil....')
-			updateprofiloke = await updateprofil(nickName,about,countryCode,city,phoneNumber, phoneCountryCode, phoneCode,walletfix,fullName,authtoken)
+			// console.log('Update Profil....')
+			updateprofiloke = await updateprofil(nickName,about,countryCode,city,phoneNumber, phoneCountryCode, phoneCode,walletfix,fullName,authtoken,age)
 			if (updateprofiloke.success==true) {
 				await fs.appendFileSync("DONE.csv", save + '\n', "utf-8");
 				console.log('SUKSES => '+email+' | '+ password+' | '+ nickName+' | '+walletaddress+' | '+pk)
@@ -163,6 +167,9 @@ function generatePassword() {
 		}else{
 			console.log(regist.result.details.MESSAGE)
 		}
+	}catch{
+		
+	}
 	}while(true)
 })();
 
